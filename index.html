@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To Do List</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>To Do List</h1>
+        <div class="input-container">
+            <input type="text" id="taskInput" placeholder="Enter a new task">
+            <input type="date" id="startDate" placeholder="Start Date">
+            <input type="date" id="dueDate" placeholder="Due Date">
+            <button onclick="addTask()">Add Task</button>
+        </div>
+        <ul id="taskList"></ul>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadTasks);
+
+        function loadTasks() {
+            const taskList = document.getElementById('taskList');
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            
+            tasks.forEach(task => {
+                const li = createTaskElement(task.text, task.completed, task.startDate, task.dueDate);
+                taskList.appendChild(li);
+            });
+        }
+
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const startDateInput = document.getElementById('startDate');
+            const dueDateInput = document.getElementById('dueDate');
+            const taskList = document.getElementById('taskList');
+            
+            if (taskInput.value.trim() !== '') {
+                const li = createTaskElement(taskInput.value, false, startDateInput.value, dueDateInput.value);
+                taskList.appendChild(li);
+                
+                saveTasks();
+                
+                taskInput.value = '';
+                startDateInput.value = '';
+                dueDateInput.value = '';
+            }
+        }
+
+        function createTaskElement(taskText, isCompleted, startDate, dueDate) {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <button class="circle-btn" onclick="toggleTask(this)">
+                    <i class="far ${isCompleted ? 'fa-check-circle' : 'fa-circle'}"></i>
+                </button>
+                <span class="${isCompleted ? 'completed' : ''}">${taskText}</span>
+                <div class="date-container">
+                    <span class="start-date">Start: ${startDate || 'Not set'}</span>
+                    <span class="due-date">Due: ${dueDate || 'Not set'}</span>
+                </div>
+                <button class="delete-btn" onclick="deleteTask(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            return li;
+        }
+
+        function toggleTask(button) {
+            const taskSpan = button.parentElement.querySelector('span');
+            const icon = button.querySelector('i');
+            taskSpan.classList.toggle('completed');
+            icon.classList.toggle('fa-circle');
+            icon.classList.toggle('fa-check-circle');
+            saveTasks();
+        }
+
+        function deleteTask(button) {
+            button.parentElement.remove();
+            saveTasks();
+        }
+
+        function saveTasks() {
+            const taskList = document.getElementById('taskList');
+            const tasks = Array.from(taskList.getElementsByTagName('li')).map(li => ({
+                text: li.querySelector('span').textContent,
+                completed: li.querySelector('span').classList.contains('completed'),
+                startDate: li.querySelector('.start-date').textContent.replace('Start: ', ''),
+                dueDate: li.querySelector('.due-date').textContent.replace('Due: ', '')
+            }));
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+    </script>
+</body>
+</html>
