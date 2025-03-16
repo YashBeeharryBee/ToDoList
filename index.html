@@ -40,7 +40,9 @@
             const taskList = document.getElementById('taskList');
             
             if (taskInput.value.trim() !== '') {
-                const li = createTaskElement(taskInput.value, false, startDateInput.value, dueDateInput.value);
+                const currentDate = new Date().toISOString().split('T')[0];
+                const startDate = startDateInput.value || currentDate;
+                const li = createTaskElement(taskInput.value, false, startDate, dueDateInput.value);
                 taskList.appendChild(li);
                 
                 saveTasks();
